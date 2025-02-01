@@ -1,0 +1,122 @@
+@import 'constants.css';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  padding: 0;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 22px;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+h3 {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+h4 {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+h5 {
+  margin-top: 0;
+  font-size: 14px;
+}
+
+h6 {
+  margin-top: 0;
+  font-size: 12px;
+}
+
+code {
+  font-size: 1.2em;
+}
+
+ul {
+  padding-inline-start: 0px;
+}
+
+li {
+  list-style-type: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  padding: 0;
+}
+
+.squares {
+  display:grid;
+  grid-template-columns: repeat(var(--col-count), var(--square-size));
+  width: calc(var(--col-count)*var(--square-size));
+  height: var(--square-size);
+
+}
+.square {
+  grid-auto-columns: auto;
+  grid-auto-rows: auto;
+  background: #fff;
+  border: 1px solid #999;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  height: var(--square-size);
+  width: var(--square-size);
+}
+
+.board-row {
+  display:grid;
+}
+
+.board-row:after {
+  display:grid;
+}
+
+.status {
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.game {
+  display: block;
+  flex-direction: row;
+}
+
+.game {
+  display: block;
+  flex-direction: row;
+}
+
+.game-board {
+  display:block;
+  grid-template-columns: 0.25*var(--square-size) calc(var(--col-count)*var(--square-size));
+}
+
+.grid-game-board {
+  display:grid;
+  grid-template-columns: calc(var(--col-count)*var(--square-size));
+  width: calc(var(--col-count)*var(--square-size));
+  height: var(--square-size);
+}
+
+.game-info {
+  margin-left: 10px;
+}

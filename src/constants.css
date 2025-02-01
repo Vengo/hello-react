@@ -1,0 +1,13 @@
+:root {
+  --square-size : 100px;
+  --light-square : #f0d8b7;
+  --dark-square : #b48764;
+  --row-count : 3;
+  --col-count : 3;
+}
+
+@media all and (max-width: 450px) {
+    :root {
+        --square-size : 50px;
+    }
+}
