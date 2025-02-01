@@ -1,8 +1,17 @@
 import { useState } from 'react';
 
-const squareBoardSize = 3;
+// Get the root element of the document
+// const root = document.documentElement;
+// Get the value of the CSS variable
+const squareBoardSize = 9;
+
 const rowCount = squareBoardSize;
 const colCount = squareBoardSize;
+const squareCount = rowCount*colCount;
+
+var root = document.querySelector(':root');
+root.style.setProperty('--row-count', rowCount)
+root.style.setProperty('--col-count', colCount)
 
 const letters="abcdefghijklmnopqrstuvwxyz"
 
@@ -137,9 +146,6 @@ export default function Game() {
 
   return (
     <div className="game">
-      <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
-      </div>
       <div>
         <GridBoard xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>

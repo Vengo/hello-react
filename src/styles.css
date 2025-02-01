@@ -101,20 +101,19 @@ body {
 }
 
 .game {
-  display: block;
+  display:block;
   flex-direction: row;
 }
 
 .game-board {
-  display:block;
+  display:flex;
   grid-template-columns: 0.25*var(--square-size) calc(var(--col-count)*var(--square-size));
 }
 
 .grid-game-board {
   display:grid;
-  grid-template-columns: calc(var(--col-count)*var(--square-size));
-  width: calc(var(--col-count)*var(--square-size));
-  height: var(--square-size);
+  grid-template-columns: repeat(var(--col-count),var(--square-size));
+  grid-template-rows: repeat(var(--rows-count),var(--square-size));
 }
 
 .game-info {
