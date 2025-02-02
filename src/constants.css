@@ -1,5 +1,5 @@
 :root {
-  --square-size : 100px;
+  --square-size : 50px;
   --light-square : #f0d8b7;
   --dark-square : #b48764;
   --row-count : 3;
@@ -8,6 +8,6 @@
 
 @media all and (max-width: 450px) {
     :root {
-        --square-size : 50px;
+        --square-size : 25px;
     }
 }

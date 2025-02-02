@@ -74,7 +74,7 @@ body {
   grid-auto-rows: auto;
   background: #fff;
   border: 1px solid #999;
-  font-size: 12px;
+  font-size: 24px;
   font-weight: bold;
   text-align: center;
   height: var(--square-size);
@@ -105,15 +105,16 @@ body {
   flex-direction: row;
 }
 
-.game-board {
-  display:flex;
-  grid-template-columns: 0.25*var(--square-size) calc(var(--col-count)*var(--square-size));
+.sub-board {
+  display:grid;
+  grid-template-columns: repeat(3,var(--square-size));
+  grid-template-rows: repeat(3,var(--square-size));
 }
 
 .grid-game-board {
   display:grid;
-  grid-template-columns: repeat(var(--col-count),var(--square-size));
-  grid-template-rows: repeat(var(--rows-count),var(--square-size));
+  grid-template-columns: repeat(3, calc(3*var(--square-size)));
+  grid-template-rows: repeat(3, calc(3*var(--square-size)));
 }
 
 .game-info {
