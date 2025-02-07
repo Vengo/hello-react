@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import './styles.css';
+import './constants.css';
 
 // Get the root element of the document
 // const root = document.documentElement;
@@ -12,8 +14,10 @@ const letters="abcdefghijklmnopqrstuvwxyz"
 function Square({ rowIndex, colIndex, squares, onSquareClick, subBoardId }) {
   const squareIndex = rowIndex * rowCount + colIndex;
   
+  let squareColor = ((squareIndex+subBoardId)%2==0) ? ' square--light' : ' square--dark';
+
   return (
-    <button className="square" onClick={() => onSquareClick(subBoardId*9+squareIndex)} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
+    <button className={"square "+squareColor} onClick={() => onSquareClick(subBoardId*9+squareIndex)} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
       {/* {squares[squareIndex]} */}
       {squares[subBoardId*9+squareIndex]}
     </button>
@@ -42,9 +46,11 @@ function SubBoard({ xIsNext, squares, onPlay, subBoardId }) {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
 
+  
+
   const gameSquares = new Array(rowCount*colCount).fill().map((_, squareIndex) => {
     return <li key={squareIndex} >
-    <div className='square'>
+    <div >
       <Square key={squareIndex} rowIndex={Math.floor(squareIndex/colCount)} colIndex={squareIndex%colCount} 
       squares={squares} onSquareClick={handleClick} subBoardId={subBoardId} squareIndex={squareIndex}/>
       </div>
@@ -81,9 +87,9 @@ function GridBoard({ xIsNext, squares, onPlay }) {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
 
-  const gameSquares = new Array(rowCount*colCount).fill().map((_, subBoardId) => {
+  const subBoards = new Array(rowCount*colCount).fill().map((_, subBoardId) => {
     return <li key={subBoardId} >
-    <div className='sub-board'>
+    <div>
       <SubBoard key={subBoardId} xIsNext={xIsNext} squares={squares} onPlay={onPlay}  subBoardId={subBoardId}/>
       </div>
 
@@ -93,7 +99,7 @@ function GridBoard({ xIsNext, squares, onPlay }) {
   return (
     <>
       <div className="status">{status}</div>
-      <div className="grid-game-board"> {gameSquares}</div>
+      <div className="grid-game-board"> {subBoards}</div>
       
     </>
   );
@@ -101,6 +107,7 @@ function GridBoard({ xIsNext, squares, onPlay }) {
 
 export default function Game() {
   const [history, setHistory] = useState([Array(81).fill(null)]);
+  const [subBoardResults, setSubBoardResult] = useState([Array(81).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
@@ -141,7 +148,7 @@ export default function Game() {
   );
 }
 
-function calculateWinner(squares) {
+function calculateWinner(squares, subBoardId) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -152,11 +159,15 @@ function calculateWinner(squares) {
     [0, 4, 8],
     [2, 4, 6],
   ];
-  // for (let i = 0; i < lines.length; i++) {
-  //   const [a, b, c] = lines[i];
-  //   if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-  //     return squares[a];
-  //   }
-  // }
+  const offSet = subBoardId*9;
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a+offSet] && 
+      squares[a+offSet] === squares[b+offSet] && 
+      squares[a+offSet] === squares[c+offSet]) {
+      return squares[a];
+    }
+  }
+
   return null;
 }
