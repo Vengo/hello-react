@@ -98,7 +98,7 @@ function GridBoard({ xIsNext, squares, onPlay }) {
 }
 
 class BoardState {
-  constructor(xIsNext=True, squares=Array(81).fill(null), nextBoard=null) {
+  constructor(xIsNext=true, squares=Array(81).fill(null), nextBoard=null) {
     this.xIsNext = xIsNext;
     this.squares = squares;
     this.nextBoard = nextBoard;
