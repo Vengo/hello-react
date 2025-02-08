@@ -16,16 +16,18 @@ function Square({ rowIndex, colIndex, squares, onSquareClick, subBoardId }) {
   
   let squareColor = ((squareIndex+subBoardId)%2==0) ? ' square--light' : ' square--dark';
 
-  return (
-    <button className={"square "+squareColor} onClick={() => onSquareClick(subBoardId*9+squareIndex)} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
+  return (<div>
+    <button className={"square "+squareColor} onClick={() => onSquareClick(subBoardId,squareIndex)} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
       {/* {squares[squareIndex]} */}
       {squares[subBoardId*9+squareIndex]}
     </button>
+  </div>
   );
 }
 
 function SubBoard({ xIsNext, squares, onPlay, subBoardId }) {
-  function handleClick(i) {
+  function handleClick(subBoardId, squareIndex) {
+    const i = subBoardId*9+squareIndex; // Calculate the index in the main squares array
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
@@ -47,15 +49,9 @@ function SubBoard({ xIsNext, squares, onPlay, subBoardId }) {
   }
 
   
-
   const gameSquares = new Array(rowCount*colCount).fill().map((_, squareIndex) => {
-    return <li key={squareIndex} >
-    <div >
-      <Square key={squareIndex} rowIndex={Math.floor(squareIndex/colCount)} colIndex={squareIndex%colCount} 
+    return <Square key={squareIndex} rowIndex={Math.floor(squareIndex/colCount)} colIndex={squareIndex%colCount} 
       squares={squares} onSquareClick={handleClick} subBoardId={subBoardId} squareIndex={squareIndex}/>
-      </div>
-
-    </li>
   });
 
   return (
@@ -88,12 +84,8 @@ function GridBoard({ xIsNext, squares, onPlay }) {
   }
 
   const subBoards = new Array(rowCount*colCount).fill().map((_, subBoardId) => {
-    return <li key={subBoardId} >
-    <div>
-      <SubBoard key={subBoardId} xIsNext={xIsNext} squares={squares} onPlay={onPlay}  subBoardId={subBoardId}/>
-      </div>
-
-    </li>
+    return       <SubBoard key={subBoardId} xIsNext={xIsNext} squares={squares} onPlay={onPlay}  subBoardId={subBoardId}/>
+      
   });
 
   return (
@@ -105,7 +97,16 @@ function GridBoard({ xIsNext, squares, onPlay }) {
   );
 }
 
+class BoardState {
+  constructor(xIsNext=True, squares=Array(81).fill(null), nextBoard=null) {
+    this.xIsNext = xIsNext;
+    this.squares = squares;
+    this.nextBoard = nextBoard;
+  }
+}
+
 export default function Game() {
+  const [boardState, setBoardState] = useState(new BoardState());
   const [history, setHistory] = useState([Array(81).fill(null)]);
   const [subBoardResults, setSubBoardResult] = useState([Array(81).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);

@@ -62,13 +62,6 @@ body {
   padding: 0;
 }
 
-.squares {
-  display:grid;
-  grid-template-columns: repeat(var(--col-count), var(--square-size));
-  width: calc(var(--col-count)*var(--square-size));
-  height: var(--square-size);
-
-}
 .square {
   grid-auto-columns: auto;
   grid-auto-rows: auto;
@@ -80,20 +73,11 @@ body {
   height: var(--square-size);
   width: var(--square-size);
 }
-
 .square--light {
   background: var(--light-square);
 }
 .square--dark {
   background: var(--dark-square);
-}
-
-.board-row {
-  display:grid;
-}
-
-.board-row:after {
-  display:grid;
 }
 
 .status {
@@ -107,23 +91,23 @@ body {
   flex-direction: row;
 }
 
-.game {
-  display:block;
-  flex-direction: row;
-}
-
 .sub-board {
   display:grid;
-  border: 4px solid #000;
+  border: 0px solid #000;
   grid-template-columns: repeat(3,var(--square-size));
   grid-template-rows: repeat(3,var(--square-size));
 }
 
 .grid-game-board {
   display:grid;
-  grid-template-columns: repeat(3, calc(3*var(--square-size)));
-  grid-template-rows: repeat(3, calc(3*var(--square-size)));
-  gap: 4px;
+  background-color: #111111;
+  margin: 0;
+  grid-template-columns: repeat(3, calc(3 * var(--square-size)));
+  grid-template-rows: repeat(3, calc(3 * var(--square-size)));
+  row-gap: calc(var(--square-size) / 16);
+  column-gap: calc(var(--square-size) / 16);
+  width: calc((9 * var(--square-size)) + (var(--square-size) / 8));
+  overflow: hidden;
 }
 
 .game-info {
