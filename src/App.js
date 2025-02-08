@@ -25,10 +25,11 @@ function Square({ rowIndex, colIndex, squares, onSquareClick, subBoardId }) {
   );
 }
 
-function SubBoard({ xIsNext, squares, onPlay, subBoardId }) {
+function SubBoard({ xIsNext, boardState, onPlay, subBoardId }) {
+  const squares = boardState.squares
   function handleClick(subBoardId, squareIndex) {
     const i = subBoardId*9+squareIndex; // Calculate the index in the main squares array
-    if (calculateWinner(squares) || squares[i]) {
+    if (calculateWinner(boardState) || squares[i]) {
       return;
     }
     const nextSquares = squares.slice();
@@ -61,21 +62,23 @@ function SubBoard({ xIsNext, squares, onPlay, subBoardId }) {
   );
 }
 
-function GridBoard({ xIsNext, squares, onPlay }) {
+function GridBoard({ xIsNext, boardState, onPlay }) {
   function handleClick(i) {
-    if (calculateWinner(squares) || squares[i]) {
+    if (calculateWinner(boardState) || squares[i]) {
       return;
     }
-    const nextSquares = squares.slice();
+    const currentSquares = boardState.squares;
+    const nextSquares = currentSquares.slice();
     if (xIsNext) {
       nextSquares[i] = 'X';
     } else {
       nextSquares[i] = 'O';
     }
-    onPlay(nextSquares);
+    const nextBoardState = BoardState(nextSquares, !xIsNext,i%9);
+    onPlay(nextBoardState);
   }
 
-  const winner = calculateWinner(squares);
+  const winner = calculateWinner(boardState);
   let status;
   if (winner) {
     status = 'Winner: ' + winner;
@@ -84,7 +87,7 @@ function GridBoard({ xIsNext, squares, onPlay }) {
   }
 
   const subBoards = new Array(rowCount*colCount).fill().map((_, subBoardId) => {
-    return       <SubBoard key={subBoardId} xIsNext={xIsNext} squares={squares} onPlay={onPlay}  subBoardId={subBoardId}/>
+    return       <SubBoard key={subBoardId} xIsNext={xIsNext} boardState={boardState} onPlay={onPlay}  subBoardId={subBoardId}/>
       
   });
 
@@ -106,15 +109,13 @@ class BoardState {
 }
 
 export default function Game() {
-  const [boardState, setBoardState] = useState(new BoardState());
-  const [history, setHistory] = useState([Array(81).fill(null)]);
-  const [subBoardResults, setSubBoardResult] = useState([Array(81).fill(null)]);
+  const [history, setHistory] = useState([new BoardState()]);
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
+  const currentGameState = history[currentMove];
 
-  function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+  function handlePlay(nextGameState) {
+    const nextHistory = [...history.slice(0, currentMove + 1), nextGameState];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
@@ -140,7 +141,7 @@ export default function Game() {
   return (
     <div className="game">
       <div>
-        <GridBoard xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+        <GridBoard xIsNext={xIsNext} boardState={currentGameState} onPlay={handlePlay} />
       </div>
       <div className="game-info">
         <ol>{moves}</ol>
@@ -149,7 +150,7 @@ export default function Game() {
   );
 }
 
-function calculateWinner(squares, subBoardId) {
+function calculateWinner(boardState, subBoardId) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -160,6 +161,7 @@ function calculateWinner(squares, subBoardId) {
     [0, 4, 8],
     [2, 4, 6],
   ];
+  const squares = boardState.squares;
   const offSet = subBoardId*9;
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
