@@ -11,74 +11,75 @@ const colCount = 3;
 
 const letters="abcdefghijklmnopqrstuvwxyz"
 
-function Square({ rowIndex, colIndex, squares, onSquareClick, subBoardId }) {
+function Square({ rowIndex, colIndex, boardState, onSquareClick, subBoardId, indexInSubBoard, isAvailable}) {
   const squareIndex = rowIndex * rowCount + colIndex;
   
-  let squareColor = ((squareIndex+subBoardId)%2==0) ? ' square--light' : ' square--dark';
-
-  return (<div>
-    <button className={"square "+squareColor} onClick={() => onSquareClick(subBoardId,squareIndex)} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
+  let squareType = isAvailable ? 'square' : 'blocked';
+  let squareColor = ((squareIndex+subBoardId)%2==0) ? 'light' : 'dark';
+  let squareClass = ' '+squareType+'--'+squareColor;
+  const squares = boardState.squares;
+  return (<div className={"square "+squareClass} subBoardId={subBoardId} indexInSubBoard={indexInSubBoard}>
+    <button className={"square "+squareClass} onClick={() => onSquareClick(subBoardId,indexInSubBoard)} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
       {/* {squares[squareIndex]} */}
-      {squares[subBoardId*9+squareIndex]}
+      {squares[subBoardId*9+indexInSubBoard]}
     </button>
   </div>
   );
 }
 
-function SubBoard({ xIsNext, boardState, onPlay, subBoardId }) {
-  const squares = boardState.squares
-  function handleClick(subBoardId, squareIndex) {
-    const i = subBoardId*9+squareIndex; // Calculate the index in the main squares array
-    if (calculateWinner(boardState) || squares[i]) {
-      return;
-    }
-    const nextSquares = squares.slice();
-    if (xIsNext) {
-      nextSquares[i] = 'X';
-    } else {
-      nextSquares[i] = 'O';
-    }
-    onPlay(nextSquares);
-  }
+function SubBoard({boardState, handleClick, subBoardId, isAvailable }) {
+  const squares = boardState.squares;
 
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = 'Winner: ' + winner;
-  } else {
-    status = 'Next player: ' + (xIsNext ? 'X' : 'O');
-  }
+  const winner = calculateSubBoardWinner(boardState, subBoardId);
+  // let status;
+  // if (winner) {
+  //   status = 'Winner: ' + winner;
+  // } else {
+  //   status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+  // }
 
   
   const gameSquares = new Array(rowCount*colCount).fill().map((_, squareIndex) => {
     return <Square key={squareIndex} rowIndex={Math.floor(squareIndex/colCount)} colIndex={squareIndex%colCount} 
-      squares={squares} onSquareClick={handleClick} subBoardId={subBoardId} squareIndex={squareIndex}/>
+      boardState={boardState} onSquareClick={handleClick} subBoardId={subBoardId} indexInSubBoard={squareIndex}
+      isAvailable={isAvailable}/>
   });
 
+  console.log("SubBoard: current game state is:");
+  console.log(boardState);
   return (
     <>
-      <div className="sub-board"> {gameSquares}</div>
+      <div className="sub-board" key={subBoardId}> {gameSquares}</div>
     </>
   );
 }
 
-function GridBoard({ xIsNext, boardState, onPlay }) {
-  function handleClick(i) {
-    if (calculateWinner(boardState) || squares[i]) {
+function GridBoard({ xIsNext, boardState, handlePlayHistory }) {
+
+  function handleSquareClick(subBoardId, indexInSubBoard) {
+    const i = subBoardId*9+indexInSubBoard;
+    const currentSquares = boardState.squares;
+    if (calculateSubBoardWinner(boardState,subBoardId) || currentSquares[i]) {
       return;
     }
-    const currentSquares = boardState.squares;
+    
     const nextSquares = currentSquares.slice();
     if (xIsNext) {
       nextSquares[i] = 'X';
     } else {
       nextSquares[i] = 'O';
     }
-    const nextBoardState = BoardState(nextSquares, !xIsNext,i%9);
-    onPlay(nextBoardState);
+    const maybeNextSubBoardId = i%9;
+    const maybeNextBoardState = new BoardState(!xIsNext, nextSquares, maybeNextSubBoardId);
+    const subBoardWinCheck = calculateSubBoardWinner(maybeNextBoardState,maybeNextSubBoardId);
+    if (!subBoardWinCheck) {
+      handlePlayHistory(maybeNextBoardState);
+    } else {
+      handlePlayHistory(new BoardState(!xIsNext, nextSquares, null))
+    }
   }
 
-  const winner = calculateWinner(boardState);
+  const winner = calculateSubBoardWinner(boardState);
   let status;
   if (winner) {
     status = 'Winner: ' + winner;
@@ -86,16 +87,22 @@ function GridBoard({ xIsNext, boardState, onPlay }) {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
 
+  const nextSubBoard = (boardState.nextBoard === null)? "any" : boardState.nextBoard;
+
+  console.log("GridBoard: current game state is:");
+  console.log(boardState);
   const subBoards = new Array(rowCount*colCount).fill().map((_, subBoardId) => {
-    return       <SubBoard key={subBoardId} xIsNext={xIsNext} boardState={boardState} onPlay={onPlay}  subBoardId={subBoardId}/>
+    const isAvailable = (calculateSubBoardWinner(boardState, subBoardId)==null) &&
+    ((boardState.nextBoard === null) || (boardState.nextBoard === subBoardId)); 
+    return <SubBoard key={subBoardId} xIsNext={xIsNext} boardState={boardState} handleClick={handleSquareClick}  
+    subBoardId={subBoardId} isAvailable={isAvailable}/>
       
   });
 
   return (
     <>
-      <div className="status">{status}</div>
+      <div className="status">{status} to play</div>
       <div className="grid-game-board"> {subBoards}</div>
-      
     </>
   );
 }
@@ -114,7 +121,7 @@ export default function Game() {
   const xIsNext = currentMove % 2 === 0;
   const currentGameState = history[currentMove];
 
-  function handlePlay(nextGameState) {
+  function handlePlayHistory(nextGameState) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextGameState];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
@@ -138,10 +145,12 @@ export default function Game() {
     );
   });
 
+  console.log("Game: current game state is:");
+  console.log(currentGameState);
   return (
     <div className="game">
       <div>
-        <GridBoard xIsNext={xIsNext} boardState={currentGameState} onPlay={handlePlay} />
+        <GridBoard xIsNext={xIsNext} boardState={currentGameState} handlePlayHistory={handlePlayHistory} />
       </div>
       <div className="game-info">
         <ol>{moves}</ol>
@@ -150,7 +159,7 @@ export default function Game() {
   );
 }
 
-function calculateWinner(boardState, subBoardId) {
+function calculateSubBoardWinner(boardState, subBoardId) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -161,6 +170,7 @@ function calculateWinner(boardState, subBoardId) {
     [0, 4, 8],
     [2, 4, 6],
   ];
+  console.log("checking board"+subBoardId+": "+JSON.stringify(boardState));
   const squares = boardState.squares;
   const offSet = subBoardId*9;
   for (let i = 0; i < lines.length; i++) {
@@ -171,6 +181,8 @@ function calculateWinner(boardState, subBoardId) {
       return squares[a];
     }
   }
+  if (squares.slice(offSet,offSet+9).every( (x) => x!=null)) {return "c"}
+
 
   return null;
 }

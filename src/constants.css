@@ -2,6 +2,8 @@
   --square-size : 50px;
   --light-square : #f0d8b7;
   --dark-square : #b48764;
+  --light-blocked: #555555;
+  --dark-blocked: #888888;
   --row-count : 3;
   --col-count : 3;
 }

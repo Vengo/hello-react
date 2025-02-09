@@ -79,6 +79,12 @@ body {
 .square--dark {
   background: var(--dark-square);
 }
+.blocked--light {
+  background: var(--light-blocked);
+}
+.blocked--dark {
+  background: var(--dark-blocked);
+}
 
 .status {
   margin-bottom: 10px;
