@@ -11,23 +11,24 @@ const colCount = 3;
 
 const letters="abcdefghijklmnopqrstuvwxyz"
 
-function Square({ rowIndex, colIndex, boardState, onSquareClick, subBoardId, indexInSubBoard, isAvailable}) {
+function Square({ rowIndex, colIndex, boardState, onSquareClick, subBoardId, indexInSubBoard, isAvailable, moveVisits}) {
   const squareIndex = rowIndex * rowCount + colIndex;
   
   let squareType = isAvailable ? 'square' : 'blocked';
   let squareColor = ((squareIndex+subBoardId)%2==0) ? 'light' : 'dark';
   let squareClass = ' '+squareType+'--'+squareColor;
+  let boardIndex = subBoardId*9+indexInSubBoard
   const squares = boardState.squares;
-  return (<div className={"square "+squareClass} subBoardId={subBoardId} indexInSubBoard={indexInSubBoard}>
-    <button className={"square "+squareClass} onClick={() => onSquareClick(subBoardId,indexInSubBoard)} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
+  let displayVisitCount = squares[boardIndex] === null;
+  let useVisitFormat = displayVisitCount ? " visit-count" : "";
+  return (<button className={"square "+squareClass+useVisitFormat} onClick={() => onSquareClick(subBoardId,indexInSubBoard)} overallindex={boardIndex} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
       {/* {squares[squareIndex]} */}
-      {squares[subBoardId*9+indexInSubBoard]}
+      {displayVisitCount && isAvailable ? moveVisits[boardIndex] : squares[boardIndex]}
     </button>
-  </div>
   );
 }
 
-function SubBoard({boardState, handleClick, subBoardId, isAvailable }) {
+function SubBoard({boardState, handleClick, subBoardId, isAvailable, moveVisits }) {
   const squares = boardState.squares;
 
   const winner = calculateSubBoardWinner(boardState, subBoardId);
@@ -42,7 +43,7 @@ function SubBoard({boardState, handleClick, subBoardId, isAvailable }) {
   const gameSquares = new Array(rowCount*colCount).fill().map((_, squareIndex) => {
     return <Square key={squareIndex} rowIndex={Math.floor(squareIndex/colCount)} colIndex={squareIndex%colCount} 
       boardState={boardState} onSquareClick={handleClick} subBoardId={subBoardId} indexInSubBoard={squareIndex}
-      isAvailable={isAvailable}/>
+      isAvailable={isAvailable} moveVisits={moveVisits}/>
   });
 
   console.log("SubBoard: current game state is:");
@@ -54,12 +55,13 @@ function SubBoard({boardState, handleClick, subBoardId, isAvailable }) {
   );
 }
 
-function GridBoard({ xIsNext, boardState, handlePlayHistory }) {
+function GridBoard({ xIsNext, boardState, handlePlayHistory, moveVisits }) {
 
   function handleSquareClick(subBoardId, indexInSubBoard) {
     const i = subBoardId*9+indexInSubBoard;
     const currentSquares = boardState.squares;
-    if (calculateSubBoardWinner(boardState,subBoardId) || currentSquares[i]) {
+    const blocked = (boardState.nextBoard != null) && (boardState.nextBoard!=subBoardId)
+    if (calculateSubBoardWinner(boardState,subBoardId) || currentSquares[i] || blocked) {
       return;
     }
     
@@ -95,7 +97,7 @@ function GridBoard({ xIsNext, boardState, handlePlayHistory }) {
     const isAvailable = (calculateSubBoardWinner(boardState, subBoardId)==null) &&
     ((boardState.nextBoard === null) || (boardState.nextBoard === subBoardId)); 
     return <SubBoard key={subBoardId} xIsNext={xIsNext} boardState={boardState} handleClick={handleSquareClick}  
-    subBoardId={subBoardId} isAvailable={isAvailable}/>
+    subBoardId={subBoardId} isAvailable={isAvailable} moveVisits={moveVisits}/>
       
   });
 
@@ -120,6 +122,9 @@ export default function Game() {
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
   const currentGameState = history[currentMove];
+
+  let moveVisits = new Array(81).fill(0);
+  moveVisits[41] = 900;
 
   function handlePlayHistory(nextGameState) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextGameState];
@@ -150,7 +155,8 @@ export default function Game() {
   return (
     <div className="game">
       <div>
-        <GridBoard xIsNext={xIsNext} boardState={currentGameState} handlePlayHistory={handlePlayHistory} />
+        <GridBoard xIsNext={xIsNext} boardState={currentGameState} handlePlayHistory={handlePlayHistory} 
+        moveVisits={moveVisits}/>
       </div>
       <div className="game-info">
         <ol>{moves}</ol>
