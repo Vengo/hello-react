@@ -72,6 +72,7 @@ body {
   text-align: center;
   height: var(--square-size);
   width: var(--square-size);
+  position: relative;
 }
 .square--light {
   background: var(--light-square);
@@ -87,10 +88,11 @@ body {
 }
 
 .visit-count {
-  align: right;
-  vertical-align: top;
+  top: 0;
+  right: 0;
   font-size: 10px;
   color: #864;
+  position: absolute;
 }
 
 .status {
@@ -101,10 +103,10 @@ body {
 
 .game {
   display: block;
-  flex-direction: row;
 }
 
 .sub-board {
+  position: relative;
   display:grid;
   border: 0px solid #000;
   grid-template-columns: repeat(3,var(--square-size));

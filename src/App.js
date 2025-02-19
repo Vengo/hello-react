@@ -21,10 +21,12 @@ function Square({ rowIndex, colIndex, boardState, onSquareClick, subBoardId, ind
   const squares = boardState.squares;
   let displayVisitCount = squares[boardIndex] === null;
   let useVisitFormat = displayVisitCount ? " visit-count" : "";
-  return (<button className={"square "+squareClass+useVisitFormat} onClick={() => onSquareClick(subBoardId,indexInSubBoard)} overallindex={boardIndex} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
-      {/* {squares[squareIndex]} */}
-      {displayVisitCount && isAvailable ? moveVisits[boardIndex] : squares[boardIndex]}
-    </button>
+  return (<div className="square">
+      <button className={"square "+squareClass} onClick={() => onSquareClick(subBoardId,indexInSubBoard)} overallindex={boardIndex} id={letters[colIndex] + (rowCount -rowIndex).toString()} >
+        {squares[boardIndex]}
+      </button>
+      {isAvailable ? <div className={useVisitFormat}>{moveVisits[boardIndex]}</div> :""}
+    </div>
   );
 }
 
@@ -32,22 +34,13 @@ function SubBoard({boardState, handleClick, subBoardId, isAvailable, moveVisits 
   const squares = boardState.squares;
 
   const winner = calculateSubBoardWinner(boardState, subBoardId);
-  // let status;
-  // if (winner) {
-  //   status = 'Winner: ' + winner;
-  // } else {
-  //   status = 'Next player: ' + (xIsNext ? 'X' : 'O');
-  // }
-
   
   const gameSquares = new Array(rowCount*colCount).fill().map((_, squareIndex) => {
     return <Square key={squareIndex} rowIndex={Math.floor(squareIndex/colCount)} colIndex={squareIndex%colCount} 
       boardState={boardState} onSquareClick={handleClick} subBoardId={subBoardId} indexInSubBoard={squareIndex}
       isAvailable={isAvailable} moveVisits={moveVisits}/>
   });
-
-  console.log("SubBoard: current game state is:");
-  console.log(boardState);
+  
   return (
     <>
       <div className="sub-board" key={subBoardId}> {gameSquares}</div>
@@ -91,8 +84,7 @@ function GridBoard({ xIsNext, boardState, handlePlayHistory, moveVisits }) {
 
   const nextSubBoard = (boardState.nextBoard === null)? "any" : boardState.nextBoard;
 
-  console.log("GridBoard: current game state is:");
-  console.log(boardState);
+  
   const subBoards = new Array(rowCount*colCount).fill().map((_, subBoardId) => {
     const isAvailable = (calculateSubBoardWinner(boardState, subBoardId)==null) &&
     ((boardState.nextBoard === null) || (boardState.nextBoard === subBoardId)); 
@@ -149,9 +141,7 @@ export default function Game() {
       </li>
     );
   });
-
-  console.log("Game: current game state is:");
-  console.log(currentGameState);
+  
   return (
     <div className="game">
       <div>
@@ -176,7 +166,7 @@ function calculateSubBoardWinner(boardState, subBoardId) {
     [0, 4, 8],
     [2, 4, 6],
   ];
-  console.log("checking board"+subBoardId+": "+JSON.stringify(boardState));
+  
   const squares = boardState.squares;
   const offSet = subBoardId*9;
   for (let i = 0; i < lines.length; i++) {
